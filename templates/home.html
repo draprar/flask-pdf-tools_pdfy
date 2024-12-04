@@ -4,22 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Tools</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
     <h1>PDF Tools</h1>
 
-    <!-- Form for Joining PDFs -->
-    <h2>Join PDFs</h2>
+    {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="message {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
     <form action="/join" method="post" enctype="multipart/form-data">
-        <input type="file" name="pdf_files" multiple required>
+        {{ join_form.hidden_tag() }}
+        <h2>Join PDFs</h2>
+        {{ join_form.pdf_files.label }}: {{ join_form.pdf_files }}
+        <div class="g-recaptcha" data-sitekey="{{ join_form.recaptcha }}"></div>
         <button type="submit">Join PDFs</button>
     </form>
 
-    <!-- Form for Splitting PDFs -->
-    <h2>Split PDF</h2>
     <form action="/split" method="post" enctype="multipart/form-data">
-        <input type="file" name="pdf_file" required>
+        {{ split_form.hidden_tag() }}
+        <h2>Split PDF</h2>
+        {{ split_form.pdf_file.label }}: {{ split_form.pdf_file }}
+        <div class="g-recaptcha" data-sitekey="{{ split_form.recaptcha }}"></div>
         <button type="submit">Split PDF</button>
     </form>
+
 </body>
 </html>
