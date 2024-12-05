@@ -9,6 +9,14 @@ from wtforms import SubmitField
 from flask_wtf.recaptcha import RecaptchaField
 from werkzeug.utils import secure_filename
 from forms import JoinPDFsForm, SplitPDFForm
+from google.cloud import recaptchaenterprise_v1
+from google.cloud.recaptchaenterprise_v1 import Assessment
+from flask import Flask, render_template, request, session, redirect, url_for, flash
+import random
+import string
+import base64
+from io import BytesIO
+from PIL import Image, ImageDraw, ImageFont
 
 
 # Load environment variables from .env file
@@ -21,39 +29,54 @@ app.secret_key = os.getenv('APP_SECRET_KEY')
 # Application settings
 app.config['UPLOAD_FOLDER'] = 'uploads'  # Folder for uploaded files
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # Max file size: 10 MB
-app.config['ALLOWED_EXTENSIONS'] = {'pdf'}  # Allowed file extensions
-app.config['RECAPTCHA_PUBLIC_KEY'] = os.getenv('RECAPTCHA_PUBLIC_KEY')
-app.config['RECAPTCHA_PRIVATE_KEY'] = os.getenv('RECAPTCHA_PRIVATE_KEY')
+app.config['ALLOWED_EXTENSIONS'] = os.getenv('ALLOWED_EXTENSIONS')
 app.config['CLEANUP_INTERVAL'] = 3600  # Cleanup interval in seconds (1 hour)
 
 # Ensure the upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 
-# Form class with reCAPTCHA
-class PDFToolForm(FlaskForm):
-    recaptcha = RecaptchaField()
-    submit = SubmitField("Verify")
+@app.template_filter('b64encode')
+def b64encode_filter(data):
+    """Encodes binary data to Base64 for embedding in HTML."""
+    if isinstance(data, bytes):
+        return base64.b64encode(data).decode('utf-8')
+    raise ValueError("b64encode filter received non-bytes input.")
+
+
+def generate_captcha_text():
+    # Generate a random string of 5 characters
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+
+
+def generate_captcha_image(text):
+    # Create an image with the captcha text
+    image = Image.new('RGB', (150, 50), color=(255, 255, 255))
+    draw = ImageDraw.Draw(image)
+    font = ImageFont.load_default()
+    draw.text((10, 10), text, fill=(0, 0, 0), font=font)
+    return image
 
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    """
-    Render the homepage and handle form submission with reCAPTCHA.
-    """
-    join_form = JoinPDFsForm()
-    split_form = SplitPDFForm()
-    cleanup_uploads()  # Clean old files
+    # Generate a new CAPTCHA
+    captcha_text = generate_captcha_text()
+    session["captcha_text"] = captcha_text  # Store it in the session
+    captcha_image = generate_captcha_image(captcha_text)
 
-    if join_form.validate_on_submit() and "pdf_files" in request.form:
-        flash("CAPTCHA verified successfully for Join PDFs!", "success")
-        return redirect(url_for("join_pdfs"))
+    # Convert the image to bytes and serve it in the template
+    image_io = BytesIO()
+    captcha_image.save(image_io, "PNG")
+    image_io.seek(0)
 
-    if split_form.validate_on_submit() and "pdf_file" in request.form:
-        flash("CAPTCHA verified successfully for Split PDF!", "success")
-        return redirect(url_for("split_pdf"))
+    return render_template("home.html", captcha_image=image_io.read())
 
-    return render_template("home.html", join_form=join_form, split_form=split_form)
+
+
+@app.route("/success")
+def success():
+    return "CAPTCHA verification succeeded!"
 
 
 def allowed_file(filename):
@@ -76,18 +99,13 @@ def cleanup_uploads():
 
 @app.route("/join", methods=["POST"])
 def join_pdfs():
-    """
-    Handle the functionality to merge multiple PDFs into one.
-    """
-    recaptcha_token = request.form.get('g-recaptcha-response')
-    if not recaptcha_token:
-        flash("Missing reCAPTCHA token. Please complete the reCAPTCHA.", "error")
+    # Validate CAPTCHA
+    user_input = request.form.get("captcha_input")
+    if user_input != session.get("captcha_text"):
+        flash("CAPTCHA verification failed. Try again.", "error")
         return redirect(url_for("home"))
 
-    if not verify_recaptcha(recaptcha_token):
-        flash("Invalid reCAPTCHA. Please try again.", "error")
-        return redirect(url_for("home"))  # Stop further processing
-
+    # Handle PDF joining logic
     files = request.files.getlist("pdf_files")
     if not files or len(files) < 2:
         flash("Please upload at least two PDF files.", "error")
@@ -113,20 +131,16 @@ def join_pdfs():
         return redirect(url_for("home"))
 
 
+
 @app.route("/split", methods=["POST"])
 def split_pdf():
-    """
-    Handle the functionality to split a PDF into individual pages.
-    """
-    recaptcha_token = request.form.get('g-recaptcha-response')
-    if not recaptcha_token:
-        flash("Missing reCAPTCHA token. Please complete the reCAPTCHA.", "error")
+    # Validate CAPTCHA
+    user_input = request.form.get("captcha_input")
+    if user_input != session.get("captcha_text"):
+        flash("CAPTCHA verification failed. Try again.", "error")
         return redirect(url_for("home"))
 
-    if not verify_recaptcha(recaptcha_token):
-        flash("Invalid reCAPTCHA. Please try again.", "error")
-        return redirect(url_for("home"))  # Stop further processing
-
+    # Handle PDF splitting logic
     file = request.files.get("pdf_file")
     if not file or not allowed_file(file.filename):
         flash("Invalid file. Please upload a valid PDF file.", "error")
@@ -166,21 +180,66 @@ def download_file(filename):
         return redirect(url_for("home"))
 
 
-def verify_recaptcha(token):
+def create_assessment(
+    project_id: str, recaptcha_key: str, token: str, recaptcha_action: str
+) -> Assessment:
+    """Create an assessment to analyze the risk of a UI action.
+    Args:
+        project_id: Your Google Cloud Project ID.
+        recaptcha_key: The reCAPTCHA key associated with the site/app
+        token: The generated token obtained from the client.
+        recaptcha_action: Action name corresponding to the token.
     """
-    Verify the reCAPTCHA token with Google's API.
-    """
-    secret_key = app.config['RECAPTCHA_PRIVATE_KEY']
-    url = "https://www.google.com/recaptcha/api/siteverify"
-    payload = {'secret': secret_key, 'response': token}
-    response = requests.post(url, data=payload)
-    result = response.json()
 
-    # Debugging information to confirm verification
-    print(f"reCAPTCHA verification result: {result}")
+    client = recaptchaenterprise_v1.RecaptchaEnterpriseServiceClient()
 
-    return result.get("success", False)
+    # Set the properties of the event to be tracked.
+    event = recaptchaenterprise_v1.Event()
+    event.site_key = recaptcha_key
+    event.token = token
 
+    assessment = recaptchaenterprise_v1.Assessment()
+    assessment.event = event
+
+    project_name = f"projects/{project_id}"
+
+    # Build the assessment request.
+    request = recaptchaenterprise_v1.CreateAssessmentRequest()
+    request.assessment = assessment
+    request.parent = project_name
+
+    response = client.create_assessment(request)
+
+    # Check if the token is valid.
+    if not response.token_properties.valid:
+        print(
+            "The CreateAssessment call failed because the token was "
+            + "invalid for the following reasons: "
+            + str(response.token_properties.invalid_reason)
+        )
+        return
+
+    # Check if the expected action was executed.
+    if response.token_properties.action != recaptcha_action:
+        print(
+            "The action attribute in your reCAPTCHA tag does"
+            + "not match the action you are expecting to score"
+        )
+        return
+    else:
+        # Get the risk score and the reason(s).
+        # For more information on interpreting the assessment, see:
+        # https://cloud.google.com/recaptcha-enterprise/docs/interpret-assessment
+        for reason in response.risk_analysis.reasons:
+            print(reason)
+        print(
+            "The reCAPTCHA score for this token is: "
+            + str(response.risk_analysis.score)
+        )
+        # Get the assessment name (id). Use this to annotate the assessment.
+        assessment_name = client.parse_assessment_path(response.name).get("assessment")
+        print(f"Assessment name: {assessment_name}")
+    return response
 
 
 if __name__ == "__main__":

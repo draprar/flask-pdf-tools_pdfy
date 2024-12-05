@@ -3,35 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Tools</title>
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <title>PDF Tools with CAPTCHA</title>
 </head>
 <body>
-    <h1>PDF Tools</h1>
+    <h1>PDF Tools with CAPTCHA</h1>
 
     {% with messages = get_flashed_messages(with_categories=True) %}
         {% if messages %}
             {% for category, message in messages %}
-                <div class="message {{ category }}">{{ message }}</div>
+                <div class="{{ category }}">{{ message }}</div>
             {% endfor %}
         {% endif %}
     {% endwith %}
 
-    <form action="/join" method="post" enctype="multipart/form-data">
-        {{ join_form.hidden_tag() }}
+    <!-- Form to Join PDFs -->
+    <form method="POST" action="/join" enctype="multipart/form-data">
         <h2>Join PDFs</h2>
-        {{ join_form.pdf_files.label }}: {{ join_form.pdf_files }}
-        <div class="g-recaptcha" data-sitekey="{{ join_form.recaptcha }}"></div>
+        <label for="pdf_files">Upload PDFs:</label>
+        <input type="file" id="pdf_files" name="pdf_files" multiple>
+        <br>
+        <label for="captcha_input">Enter CAPTCHA:</label>
+        <img src="data:image/png;base64,{{ captcha_image | b64encode }}" alt="CAPTCHA">
+        <input type="text" id="captcha_input" name="captcha_input">
         <button type="submit">Join PDFs</button>
     </form>
 
-    <form action="/split" method="post" enctype="multipart/form-data">
-        {{ split_form.hidden_tag() }}
+    <hr>
+
+    <!-- Form to Split PDF -->
+    <form method="POST" action="/split" enctype="multipart/form-data">
         <h2>Split PDF</h2>
-        {{ split_form.pdf_file.label }}: {{ split_form.pdf_file }}
-        <div class="g-recaptcha" data-sitekey="{{ split_form.recaptcha }}"></div>
+        <label for="pdf_file">Upload PDF:</label>
+        <input type="file" id="pdf_file" name="pdf_file">
+        <br>
+        <label for="captcha_input">Enter CAPTCHA:</label>
+        <img src="data:image/png;base64,{{ captcha_image | b64encode }}" alt="CAPTCHA">
+        <input type="text" id="captcha_input" name="captcha_input">
         <button type="submit">Split PDF</button>
     </form>
-
 </body>
 </html>
