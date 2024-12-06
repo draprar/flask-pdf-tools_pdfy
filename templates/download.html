@@ -4,13 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Download Files</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <h1>Download Split Files</h1>
-    <ul>
-        {% for file in files %}
-        <li><a href="{{ url_for('download_file', filename=file.split('/')[-1]) }}">{{ file.split('/')[-1] }}</a></li>
-        {% endfor %}
-    </ul>
+    <div class="container my-5">
+        <h1 class="text-center mb-4">Download Split Files</h1>
+        <ul class="list-group">
+            {% for file in files %}
+            <li class="list-group-item">
+                <a href="{{ url_for('download_file', filename=file|basename) }}" class="btn btn-link">
+                    {{ file|basename }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
 </body>
 </html>

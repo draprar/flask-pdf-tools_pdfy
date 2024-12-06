@@ -1,16 +1,17 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField
-from wtforms import SubmitField, IntegerField
+from wtforms import SubmitField, IntegerField, StringField
 from wtforms.validators import DataRequired, NumberRange
 
 
 class JoinPDFsForm(FlaskForm):
-    pdf_files = FileField("Upload PDFs")  # For the Join PDFs form
+    pdf_files = FileField("Upload PDFs", validators=[DataRequired()])
     submit = SubmitField("Join PDFs")
-    captcha_answer = IntegerField("What is 5 + 3?", validators=[DataRequired(), NumberRange(min=8, max=8)])
+    captcha_answer = StringField("Enter CAPTCHA", validators=[DataRequired()])
 
 
 class SplitPDFForm(FlaskForm):
-    pdf_file = FileField("Upload a PDF")  # For the Split PDF form
+    pdf_file = FileField("Upload a PDF", validators=[DataRequired()])
     submit = SubmitField("Split PDF")
-    captcha_answer = IntegerField("What is 5 + 3?", validators=[DataRequired(), NumberRange(min=8, max=8)])
+    captcha_answer = StringField("Enter CAPTCHA", validators=[DataRequired()])
+
