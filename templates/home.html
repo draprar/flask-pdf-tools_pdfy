@@ -44,7 +44,7 @@
                             {{ form.hidden_tag() }}
                             <div class="mb-3">
                                 {{ form.pdf_files.label(class="form-label") }}
-                                {{ form.pdf_files(class="form-control") }}
+                                <input type="file" name="pdf_files" class="form-control" multiple>
                                 {% for error in form.pdf_files.errors %}
                                     <div class="text-danger">{{ error }}</div>
                                 {% endfor %}
