@@ -5,8 +5,9 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Install system dependencies (if needed, e.g., for PyPDF2 or other libraries)
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    libffi-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install dependencies
