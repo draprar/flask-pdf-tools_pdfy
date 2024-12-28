@@ -1,7 +1,7 @@
 import os
 import tempfile
 import time
-from utils import (
+from flask_app.utils import (
     generate_captcha_text,
     generate_captcha_image,
     allowed_file,
@@ -27,19 +27,30 @@ def test_generate_captcha_image():
     text = "ABCDE"
     image = generate_captcha_image(text)
     assert isinstance(image, Image.Image), "Output should be a PIL Image"
-    assert image.size == (280, 90), "Image dimensions should match the generator's default size"
+    assert image.size == (
+        280,
+        90,
+    ), "Image dimensions should match the generator's default size"
 
 
 def test_allowed_file():
     """Test the allowed_file function."""
     assert allowed_file("document.pdf"), "Valid PDF file should be allowed"
-    assert not allowed_file("document.exe"), "Invalid file extension should not be allowed"
+    assert not allowed_file(
+        "document.exe"
+    ), "Invalid file extension should not be allowed"
     assert not allowed_file("document"), "File without extension should not be allowed"
-    assert allowed_file("document.PDF"), "Case-insensitive file extension should be allowed"
+    assert allowed_file(
+        "document.PDF"
+    ), "Case-insensitive file extension should be allowed"
 
     # Custom allowed extensions
-    assert allowed_file("image.jpg", allowed_extensions={"jpg", "png"}), "Valid custom extension should be allowed"
-    assert not allowed_file("image.pdf", allowed_extensions={"jpg", "png"}), "Invalid custom extension should not be allowed"
+    assert allowed_file(
+        "image.jpg", allowed_extensions={"jpg", "png"}
+    ), "Valid custom extension should be allowed"
+    assert not allowed_file(
+        "image.pdf", allowed_extensions={"jpg", "png"}
+    ), "Invalid custom extension should not be allowed"
 
 
 def test_cleanup_uploads():
@@ -63,7 +74,9 @@ def test_cleanup_uploads():
 
             # Assert that old files are deleted and recent ones remain
             assert not os.path.exists(old_file.name), "Old files should be deleted"
-            assert os.path.exists(recent_file.name), "Recent files should not be deleted"
+            assert os.path.exists(
+                recent_file.name
+            ), "Recent files should not be deleted"
         finally:
             # Clean up any remaining files
             if os.path.exists(old_file.name):

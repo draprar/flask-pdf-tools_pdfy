@@ -14,7 +14,7 @@ def generate_captcha_text(length=5):
     Returns:
         str: A random string containing uppercase letters and digits.
     """
-    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
+    return "".join(random.choices(string.ascii_uppercase + string.digits, k=length))
 
 
 def generate_captcha_image(text):
@@ -27,8 +27,13 @@ def generate_captcha_image(text):
     Returns:
         PIL.Image.Image: Generated CAPTCHA image.
     """
-    from captcha.image import ImageCaptcha  # Imported here to minimize dependencies for unused cases
-    image_generator = ImageCaptcha(width=280, height=90)  # Customize image dimensions if needed
+    from captcha.image import (
+        ImageCaptcha,
+    )  # Imported here to minimize dependencies for unused cases
+
+    image_generator = ImageCaptcha(
+        width=280, height=90
+    )  # Customize image dimensions if needed
     return image_generator.generate_image(text)
 
 
@@ -44,8 +49,8 @@ def allowed_file(filename, allowed_extensions=None):
         bool: True if the file has a valid extension, False otherwise.
     """
     if not allowed_extensions:
-        allowed_extensions = {'pdf'}
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
+        allowed_extensions = {"pdf"}
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in allowed_extensions
 
 
 def cleanup_uploads(upload_folder, cleanup_interval):
@@ -60,10 +65,14 @@ def cleanup_uploads(upload_folder, cleanup_interval):
         None
     """
     import time
+
     current_time = time.time()
     for filename in os.listdir(upload_folder):
         file_path = os.path.join(upload_folder, filename)
-        if os.path.isfile(file_path) and current_time - os.path.getmtime(file_path) > cleanup_interval:
+        if (
+            os.path.isfile(file_path)
+            and current_time - os.path.getmtime(file_path) > cleanup_interval
+        ):
             try:
                 os.remove(file_path)
             except OSError as e:
