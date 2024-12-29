@@ -1,18 +1,7 @@
 import os
 import logging
-import base64
-from datetime import datetime
 from io import BytesIO
-from flask import (
-    Blueprint,
-    render_template,
-    request,
-    send_file,
-    flash,
-    redirect,
-    url_for,
-    session,
-)
+from flask import Blueprint, render_template, request, send_file, flash, redirect, url_for, session
 from werkzeug.utils import secure_filename
 from PyPDF2 import PdfMerger, PdfReader, PdfWriter
 from flask_app.forms import JoinPDFsForm, SplitPDFForm
@@ -20,26 +9,17 @@ from flask_app.utils import generate_captcha_text, generate_captcha_image, allow
 
 main = Blueprint("main", __name__)
 
-# Render the home page
+
 @main.route("/", methods=["GET"])
 def home():
     session["join_captcha_text"] = generate_captcha_text()
-    join_captcha_image = generate_captcha_image(session["join_captcha_text"])
-    join_image_io = BytesIO()
-    join_captcha_image.save(join_image_io, "PNG")
-
     session["split_captcha_text"] = generate_captcha_text()
-    split_captcha_image = generate_captcha_image(session["split_captcha_text"])
-    split_image_io = BytesIO()
-    split_captcha_image.save(split_image_io, "PNG")
 
-    return render_template(
-        "home.html",
-        form=JoinPDFsForm(),
-        split_form=SplitPDFForm(),
-        join_captcha_image=join_image_io.getvalue(),
-        split_captcha_image=split_image_io.getvalue(),
-    )
+    return render_template("home.html",
+                           form=JoinPDFsForm(),
+                           split_form=SplitPDFForm(),
+                           join_captcha_image=generate_captcha_image(session["join_captcha_text"]).tobytes(),
+                           split_captcha_image=generate_captcha_image(session["split_captcha_text"]).tobytes())
 
 
 @main.route("/join", methods=["POST"])
