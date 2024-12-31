@@ -4,15 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e8c03de8-7b8b-4009-a6ec-253ab39bbea6" name="Changes" comment="Get back">
-      <change afterPath="$PROJECT_DIR$/flask_app/cleanup.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flask_app/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/flask_app/routes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flask_app/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/flask_app/templates/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flask_app/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/flask_app/utils.py" afterDir="false" />
-    </list>
+    <list default="true" id="e8c03de8-7b8b-4009-a6ec-253ab39bbea6" name="Changes" comment="Finishing" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -80,11 +72,20 @@
       <option name="project" value="LOCAL" />
       <updated>1735587806546</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Finishing">
+      <option name="closed" value="true" />
+      <created>1735659097378</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1735659097378</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Get back" />
-    <option name="LAST_COMMIT_MESSAGE" value="Get back" />
+    <MESSAGE value="Finishing" />
+    <option name="LAST_COMMIT_MESSAGE" value="Finishing" />
   </component>
 </project>
