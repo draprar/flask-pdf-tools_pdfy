@@ -18,8 +18,8 @@ def home():
     return render_template("home.html",
                            form=JoinPDFsForm(),
                            split_form=SplitPDFForm(),
-                           join_captcha_image=generate_captcha_image(session["join_captcha_text"]).tobytes(),
-                           split_captcha_image=generate_captcha_image(session["split_captcha_text"]).tobytes())
+                           join_captcha_image=generate_captcha_image(session["join_captcha_text"]),
+                           split_captcha_image=generate_captcha_image(session["split_captcha_text"]))
 
 
 @main.route("/join", methods=["POST"])

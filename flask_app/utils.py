@@ -1,7 +1,8 @@
 import os
 import random
 import string
-from werkzeug.utils import secure_filename
+import base64
+from io import BytesIO
 from captcha.image import ImageCaptcha
 
 
@@ -11,9 +12,13 @@ def generate_captcha_text(length=5):
 
 
 def generate_captcha_image(text):
-    """Generate a CAPTCHA image using the PIL-based library."""
+    """Generate a CAPTCHA image as a Base64 string."""
     image_generator = ImageCaptcha(width=280, height=90)
-    return image_generator.generate_image(text)
+    image = image_generator.generate_image(text)
+    buffered = BytesIO()
+    image.save(buffered, format="PNG")
+    base64_image = base64.b64encode(buffered.getvalue()).decode("utf-8")
+    return base64_image
 
 
 def allowed_file(filename, allowed_extensions=None):

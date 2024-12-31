@@ -52,7 +52,7 @@
                             <div class="mb-3">
                                 {{ form.captcha_answer.label(class="form-label") }}
                                 <div class="mb-2">
-                                    <img src="data:image/png;base64,{{ join_captcha_image | b64encode }}" alt="CAPTCHA" class="img-fluid">
+                                    <img src="data:image/png;base64,{{ join_captcha_image }}" alt="CAPTCHA" class="img-fluid">
                                 </div>
                                 {{ form.captcha_answer(class="form-control") }}
                                 {% for error in form.captcha_answer.errors %}
@@ -84,7 +84,7 @@
                             <div class="mb-3">
                                 {{ split_form.captcha_answer.label(class="form-label") }}
                                 <div class="mb-2">
-                                    <img src="data:image/png;base64,{{ split_captcha_image | b64encode }}" alt="CAPTCHA" class="img-fluid">
+                                    <img src="data:image/png;base64,{{ split_captcha_image }}" alt="CAPTCHA" class="img-fluid">
                                 </div>
                                 {{ split_form.captcha_answer(class="form-control") }}
                                 {% for error in split_form.captcha_answer.errors %}
