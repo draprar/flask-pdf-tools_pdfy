@@ -1,6 +1,7 @@
 import os
 import logging
 import base64
+from datetime import datetime
 from flask import Flask
 from flask_talisman import Talisman
 
@@ -22,10 +23,22 @@ def create_app(config_name="default"):
         app.config.from_object("flask_app.config.Config")
 
     # Create upload folder if it doesn't exist
-    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+    try:
+        os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+    except Exception as e:
+        logging.error(f"Failed to create upload folder: {e}")
+        raise
 
-    # Configure logging
-    logging.basicConfig(level=logging.INFO)
+    # Configure logging (production-grade)
+    if config_name != "testing":
+        from flask_app.logging_config import setup_logging
+        setup_logging(app)
+    else:
+        # Minimal logging for tests
+        logging.basicConfig(
+            level=logging.WARNING,
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        )
 
     # Initialize Talisman for security headers
     is_production = os.getenv("FLASK_ENV") == "production"
@@ -33,7 +46,14 @@ def create_app(config_name="default"):
         app,
         content_security_policy=app.config["TALISMAN_CSP"],
         force_https=is_production,
+        strict_transport_security=is_production,
+        strict_transport_security_max_age=31536000 if is_production else None,
     )
+
+    # Initialize rate limiting (abuse prevention)
+    if config_name != "testing":
+        from flask_app.rate_limiter import init_rate_limiting
+        init_rate_limiting(app)
 
     # Register custom filters
     app.jinja_env.filters["b64encode"] = b64encode
@@ -45,7 +65,6 @@ def create_app(config_name="default"):
     # Inject current year into templates
     @app.context_processor
     def inject_year():
-        from datetime import datetime
         return {"year": datetime.now().year}
 
     return app

@@ -1,5 +1,6 @@
+import logging
 import os
-import random
+import secrets
 import string
 import base64
 from io import BytesIO
@@ -7,8 +8,8 @@ from captcha.image import ImageCaptcha
 
 
 def generate_captcha_text(length=5):
-    """Generate a secure random string for CAPTCHA."""
-    return "".join(random.choices(string.ascii_uppercase + string.digits, k=length))
+    """Generate a cryptographically secure random string for CAPTCHA."""
+    return "".join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(length))
 
 
 def generate_captcha_image(text):
