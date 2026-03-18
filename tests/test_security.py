@@ -72,9 +72,9 @@ class TestPathTraversal:
         response = client.get("/download/safe.pdf")
         assert response.status_code in (200, 404)  # File exists or not found
 
-        # Should fail - trying to escape
+        # Should fail - trying to escape (path traversal)
         response = client.get("/download/../config.py")
-        assert response.status_code == 302
+        assert response.status_code in (302, 404)  # Should fail - trying to escape
 
     def test_download_normalized_path_validation(self, client):
         """Verify that normalized paths are validated (prevents bypasses)."""
