@@ -5,8 +5,7 @@ Tests for path traversal, CSRF protection, file validation, and other security c
 
 import os
 import pytest
-from flask import url_for, session
-from werkzeug.datastructures import FileStorage
+from flask import url_for
 from io import BytesIO
 
 
