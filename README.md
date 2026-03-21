@@ -2,8 +2,6 @@
 
 This application provides a web interface for merging and splitting PDF files with security features including CAPTCHA validation and content security policies.
 
-![Project Demo](uploads/ss.png)
-
 ## Features
 
 - **Merge PDFs**: Combine multiple PDF files into a single document
@@ -12,6 +10,7 @@ This application provides a web interface for merging and splitting PDF files wi
 - **Security Headers**: Content Security Policy (CSP) and HSTS headers
 - **File Upload Protection**: Path traversal prevention and file type validation
 - **Secure Session Management**: Cryptographically secure secret key handling
+- **Rate Limiting**: Prevents abuse with configurable request limits
 
 ## Prerequisites
 
@@ -147,6 +146,10 @@ Schedule this to run periodically (e.g., with cron):
 - Image-based CAPTCHA validation
 - Protection against automated abuse
 
+### Rate Limiting
+- Configurable request limits per IP
+- Prevents brute force and DoS attacks
+
 ## Testing
 
 Run the test suite:
@@ -185,6 +188,8 @@ flask-pdf-tools_pdfy/
 ├── Dockerfile            # Docker configuration
 ├── docker-compose.yml    # Docker Compose configuration
 ├── nginx.conf            # Nginx reverse proxy configuration
+├── logs/                 # Application logs
+├── uploads/              # Uploaded and processed files
 ├── flask_app/
 │   ├── __init__.py       # Flask app factory
 │   ├── config.py         # Configuration classes
@@ -192,13 +197,16 @@ flask-pdf-tools_pdfy/
 │   ├── forms.py          # WTForms form definitions
 │   ├── utils.py          # Utility functions
 │   ├── cleanup.py        # File cleanup script
+│   ├── logging_config.py    # Logging configuration
+│   ├── rate_limiter.py       # Rate limiting functionality
 │   └── templates/        # HTML templates
 │       ├── home.html     # Home page
 │       ├── download.html # Download page
 │       ├── 404.html      # 404 error page
 │       └── 500.html      # 500 error page
 └── tests/
-    └── test_app.py       # Unit and integration tests
+    ├── test_app.py       # Unit and integration tests
+    └── test_security.py     # Security-related tests
 ```
 
 ## Troubleshooting
@@ -214,14 +222,6 @@ flask-pdf-tools_pdfy/
 ### PDF merge/split fails
 - Ensure uploaded file is a valid PDF
 - Check file size doesn't exceed `MAX_CONTENT_LENGTH`
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## License
 
@@ -249,4 +249,3 @@ For production deployments:
 ## Support
 
 For issues and questions, please open an issue on GitHub.
-
