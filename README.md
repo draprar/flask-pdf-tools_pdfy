@@ -1,5 +1,7 @@
 # PDF Tool Application
 
+![Screenshot](uploads/ss.png)
+
 This application provides a web interface for merging and splitting PDF files with security features including CAPTCHA validation and content security policies.
 
 ## Features
